@@ -200,36 +200,36 @@
             </script>
 
             <script>
-        document.getElementById("employeeForm").addEventListener("submit", async function (e) {
-            e.preventDefault();
+            document.getElementById("employeeForm").addEventListener("submit", async function (e) {
+                e.preventDefault();
 
-            const data = {
-            fullName: document.getElementById("fullName").value,
-            email: document.getElementById("email").value,
-            birthday: document.getElementById("birthday").value,
-            age: document.getElementById("age").value,
-            residence: document.getElementById("residence").value,
-            mailing: document.getElementById("mailing").value,
-            phone: document.getElementById("phone").value,
-            altPhone: document.getElementById("altPhone").value,
-            personalEmail: document.getElementById("personalEmail").value,
-            emergencyContact: document.getElementById("emergencyContact").value,
-            role: document.getElementById("role").value,
-            sendWelcome: document.getElementById("sendWelcome").checked
-            };
+                const data = {
+                fullName: document.getElementById("fullName").value,
+                email: document.getElementById("email").value,
+                birthday: document.getElementById("birthday").value,
+                age: document.getElementById("age").value,
+                residence: document.getElementById("residence").value,
+                mailing: document.getElementById("mailing").value,
+                phone: document.getElementById("phone").value,
+                altPhone: document.getElementById("altPhone").value,
+                personalEmail: document.getElementById("personalEmail").value,
+                emergencyContact: document.getElementById("emergencyContact").value,
+                role: document.getElementById("role").value,
+                sendWelcome: document.getElementById("sendWelcome").checked
+                };
 
-           fetch("https://tumbletech.app.n8n.cloud/webhook/add-employee", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: new URLSearchParams(data)
-            })
-            .then(res => res.text())
-            .then(console.log)
-            .catch(console.error);
+                fetch("https://tumbletech.app.n8n.cloud/webhook/add-employee", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams(data)
+                })
+                .then(res => res.text())
+                .then(console.log)
+                .catch(console.error);
 
-        });
+            });
         </script>
 
 
