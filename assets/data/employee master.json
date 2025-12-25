@@ -1,0 +1,102 @@
+[
+  {
+    "employee_no": "2019-003",
+    "full_name": "Emmanuel Legaspi",
+    "position": "Staff",
+    "department": "Engineering",
+    "user_id": "eman_lgspi",
+    "employment_type": "Full-time",
+    "date_hired": "2019-02-12",
+    "access_code": "abc123"
+  },
+  {
+    "employee_no": "2019-022",
+    "full_name": "Mark Mendoza",
+    "position": "Technician",
+    "department": "Engineering",
+    "user_id": "mark_mend",
+    "employment_type": "Full-time",
+    "date_hired": "2019-09-04",
+    "access_code": "abc123"
+  },
+  {
+    "employee_no": "2019-023",
+    "full_name": "Annie Marie Nante",
+    "position": "Office Clerk",
+    "department": "Admin",
+    "user_id": "ann_nante",
+    "employment_type": "Full-time",
+    "date_hired": "2019-09-09",
+    "access_code": "abc123"
+  },
+  {
+    "employee_no": "2020-005",
+    "full_name": "Jose Infanta",
+    "position": "Engineer",
+    "department": "Engineering",
+    "user_id": "jose_inf",
+    "employment_type": "Full-time",
+    "date_hired": "2020-05-05",
+    "access_code": "abc123"
+  },
+  {
+    "employee_no": "2020-015",
+    "full_name": "Marielle Vera",
+    "position": "Admin",
+    "department": "Admin",
+    "user_id": "mar_vera",
+    "employment_type": "Full-time",
+    "date_hired": "2020-12-07",
+    "access_code": "abc123"
+  },
+  {
+    "employee_no": "2020-073",
+    "full_name": "Henry Domingo",
+    "position": "Foreman",
+    "department": "Engineering",
+    "user_id": "henry_dom",
+    "employment_type": "Full-time",
+    "date_hired": "2020-11-15",
+    "access_code": "abc123"
+  },
+  {
+    "employee_no": "2021-001",
+    "full_name": "Pilo Enrique",
+    "position": "Driver",
+    "department": "Admin",
+    "user_id": "pilo_enr",
+    "employment_type": "Part-time",
+    "date_hired": "2021-01-18",
+    "access_code": "abc123"
+  },
+  {
+    "employee_no": "2022-007",
+    "full_name": "Edward Hidalgo",
+    "position": "QA Officer",
+    "department": "Engineering",
+    "user_id": "edwa_hida",
+    "employment_type": "Full-time",
+    "date_hired": "2022-03-25",
+    "access_code": "abc123"
+  },
+  {
+    "employee_no": "2023-008",
+    "full_name": "Ernesto Villegas",
+    "position": "Electrician",
+    "department": "Engineering",
+    "user_id": "ern_vill",
+    "employment_type": "Full-time",
+    "date_hired": "2023-04-11",
+    "access_code": "abc123"
+  },
+  {
+    "employee_no": "2024-006",
+    "full_name": "Rustico Hipolito",
+    "position": "Maintenance",
+    "department": "Engineering",
+    "user_id": "rust_hipo",
+    "employment_type": "Full-time",
+    "date_hired": "2024-05-19",
+    "access_code": "abc123"
+  }
+]
