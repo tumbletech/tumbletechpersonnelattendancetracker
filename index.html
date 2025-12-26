@@ -1,284 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tumbletech Employee Portal - Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tumbletech Attendance Portal</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
-    body { background:#f0f2f5; }
-    .topbar {
-      background:#1f2328;
-      color:#fff;
-      padding: 14px 16px;
+    body {
+      background-color: #f0f2f5;
+    }
+    .card {
+      max-width: 600px;
+      margin: auto;
+      margin-top: 6%;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       border-radius: 10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
     }
-    .clockbox {
-      display:flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content:flex-end;
-    }
-    .clock {
-      background: rgba(255,255,255,.08);
-      padding: 8px 10px;
-      border-radius: 10px;
-      min-width: 210px;
-      line-height: 1.2;
-    }
-    .clock small { opacity: .8; display:block; }
-    .card { border-radius: 12px; }
-    .btn-wide { width: 100%; }
-    .muted { color:#6c757d; }
-    .pill {
-      display:inline-block; padding:4px 10px; border-radius: 999px;
-      background:#eef1f4; font-size: 12px;
+    .section-title {
+      font-weight: 600;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 
 <body>
-  <div class="container my-4">
 
-    <!-- TOP BAR -->
-    <div class="topbar mb-3">
-      <div>
-        <div class="fs-5 fw-semibold">Employee Dashboard</div>
-        <div class="muted" style="color:rgba(255,255,255,.65)!important">
-          Welcome, <span id="fullNameText">...</span>
-          <span class="ms-2 pill" id="empMeta">Loading...</span>
-        </div>
-      </div>
+<!-- 🔒 LOGIN GUARD -->
+<script>
+if (!localStorage.getItem("userID")) {
+  window.location.href = "login.html";
+}
+</script>
 
-      <div class="clockbox">
-        <div class="clock">
-          <small>Local Time</small>
-          <div class="fw-semibold" id="localClock">--:--:--</div>
-          <small id="localTzLabel">Device timezone</small>
-        </div>
+<!-- 🕒 CLOCKS -->
+<div class="position-fixed top-0 end-0 p-3 text-end">
+  <div class="fw-bold">Local Time</div>
+  <div id="localClock" class="fs-5"></div>
 
-        <div class="clock">
-          <small>Work Time</small>
-          <div class="fw-semibold" id="workClock">--:--:--</div>
-          <div class="d-flex align-items-center gap-2 mt-1">
-            <small class="m-0">TZ:</small>
-            <select id="workTz" class="form-select form-select-sm" style="max-width: 170px;">
-              <!-- common defaults -->
-              <option value="Asia/Manila">Asia/Manila</option>
-              <option value="America/Chicago">America/Chicago</option>
-              <option value="America/New_York">America/New_York</option>
-              <option value="America/Los_Angeles">America/Los_Angeles</option>
-              <option value="Europe/London">Europe/London</option>
-              <option value="Asia/Dubai">Asia/Dubai</option>
-              <option value="Asia/Singapore">Asia/Singapore</option>
-            </select>
-          </div>
-        </div>
-      </div>
+  <div class="fw-bold mt-2">Work Time</div>
+  <div id="workClock" class="fs-5"></div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div class="card-header bg-dark text-white text-center fw-bold fs-5">
+      Employee Dashboard
     </div>
 
-    <!-- ATTENDANCE -->
-    <div class="card mb-3">
-      <div class="card-body">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <h5 class="m-0">Attendance</h5>
-          <div class="muted">Last action: <span id="lastAction">None</span></div>
-        </div>
+    <div class="card-body">
 
-        <div class="row g-2 mt-2">
-          <div class="col-6 col-md-3"><button class="btn btn-success btn-wide" onclick="sendAttendance('TIME_IN')">Time In</button></div>
-          <div class="col-6 col-md-3"><button class="btn btn-warning btn-wide" onclick="sendAttendance('BREAK_OUT')">Break Out</button></div>
-          <div class="col-6 col-md-3"><button class="btn btn-info btn-wide" onclick="sendAttendance('BREAK_IN')">Break In</button></div>
-          <div class="col-6 col-md-3"><button class="btn btn-danger btn-wide" onclick="sendAttendance('TIME_OUT')">Time Out</button></div>
-        </div>
-      </div>
-    </div>
+      <!-- 👤 WELCOME -->
+      <h5 class="text-center mb-4">
+        Welcome, <span id="empName"></span>
+      </h5>
 
-    <!-- LEAVE -->
-    <div class="row g-3">
-      <div class="col-lg-6">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="mb-3">Leave Balance</h5>
-            <!-- demo defaults; you can later load these from Sheets -->
-            <div class="d-flex justify-content-between border-bottom py-2">
-              <div>Vacation Leave</div><div class="fw-semibold" id="vlBal">7</div>
-            </div>
-            <div class="d-flex justify-content-between border-bottom py-2">
-              <div>Sick Leave</div><div class="fw-semibold" id="slBal">7</div>
-            </div>
-            <div class="d-flex justify-content-between py-2">
-              <div>Emergency Leave</div><div class="fw-semibold" id="elBal">3</div>
-            </div>
-            <div class="small muted mt-2">
-              Note: Balances are demo values for now. You can wire this to Sheets later.
-            </div>
-          </div>
-        </div>
+      <!-- 🕒 ATTENDANCE -->
+      <div class="mb-4">
+        <div class="section-title">Attendance</div>
+
+        <button class="btn btn-success w-100 mb-2" onclick="logAttendance('TIME_IN')">
+          Time In
+        </button>
+
+        <button class="btn btn-danger w-100" onclick="logAttendance('TIME_OUT')">
+          Time Out
+        </button>
+
+        <div id="lastAction" class="mt-2 text-muted text-center"></div>
       </div>
 
-      <div class="col-lg-6">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="mb-3">File Leave</h5>
-
-            <form onsubmit="submitLeave(event)">
-              <div class="mb-2">
-                <label class="form-label">Leave Type</label>
-                <select id="leaveType" class="form-select" required>
-                  <option value="">Select...</option>
-                  <option value="VACATION">Vacation</option>
-                  <option value="SICK">Sick</option>
-                  <option value="EMERGENCY">Emergency</option>
-                  <option value="OTHER">Other</option>
-                </select>
-              </div>
-
-              <div class="row g-2">
-                <div class="col-6">
-                  <label class="form-label">Start Date</label>
-                  <input id="leaveStart" type="date" class="form-control" required>
-                </div>
-                <div class="col-6">
-                  <label class="form-label">End Date</label>
-                  <input id="leaveEnd" type="date" class="form-control" required>
-                </div>
-              </div>
-
-              <div class="mt-2">
-                <label class="form-label">Reason</label>
-                <textarea id="leaveReason" class="form-control" rows="2" placeholder="Optional but recommended"></textarea>
-              </div>
-
-              <div class="d-grid mt-3">
-                <button class="btn btn-dark" type="submit">Submit Leave Request</button>
-              </div>
-            </form>
-
-            <hr>
-
-            <h6 class="mb-2">My Leave Requests</h6>
-            <div class="small muted mb-2">Demo list. Wire to Sheets later.</div>
-            <ul class="list-group" id="leaveList">
-              <li class="list-group-item d-flex justify-content-between">
-                <span>VACATION (Jan 10–Jan 12)</span>
-                <span class="badge text-bg-warning">Pending</span>
-              </li>
-            </ul>
-          </div>
-        </div>
+      <!-- 🌴 LEAVE BALANCE -->
+      <div class="mb-4">
+        <div class="section-title">Leave Balance</div>
+        <ul class="list-group">
+          <li class="list-group-item d-flex justify-content-between">
+            Vacation Leave <span id="vacLeave">7</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            Sick Leave <span id="sickLeave">5</span>
+          </li>
+        </ul>
       </div>
-    </div>
 
-    <!-- APPROVER (optional, hidden by default) -->
-    <div class="card mt-3 d-none" id="approverPanel">
-      <div class="card-body">
-        <h5 class="mb-2">Approver Panel</h5>
-        <div class="muted small mb-3">Visible only if your employee record says you are an approver.</div>
-        <button class="btn btn-outline-primary" onclick="alert('Approver flow: coming soon / client-configurable')">
-          Open Leave Approval
+      <!-- 📝 FILE LEAVE -->
+      <div class="mb-4">
+        <div class="section-title">File Leave</div>
+
+        <select id="leaveType" class="form-select mb-2">
+          <option value="Vacation">Vacation</option>
+          <option value="Sick">Sick</option>
+          <option value="Emergency">Emergency</option>
+        </select>
+
+        <input type="date" id="leaveFrom" class="form-control mb-2">
+        <input type="date" id="leaveTo" class="form-control mb-2">
+
+        <textarea id="leaveNote" class="form-control mb-2" placeholder="Optional note"></textarea>
+
+        <button class="btn btn-primary w-100" onclick="submitLeave()">
+          Submit Leave Request
         </button>
       </div>
-    </div>
 
-    <div class="text-center mt-4">
-      <button class="btn btn-outline-secondary btn-sm" onclick="logout()">Logout</button>
+      <!-- 📋 MY LEAVE REQUESTS -->
+      <div class="mb-4">
+        <div class="section-title">My Leave Requests</div>
+
+        <ul id="leaveList" class="list-group">
+          <li class="list-group-item">
+            Dec 30–31 | Vacation | <span class="badge bg-warning text-dark">Pending</span>
+          </li>
+          <li class="list-group-item">
+            Jan 5 | Sick | <span class="badge bg-success">Approved</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 🚪 LOGOUT -->
+      <button class="btn btn-outline-secondary w-100" onclick="logout()">
+        Logout
+      </button>
+
     </div>
   </div>
+</div>
 
-  <script>
-    // ====== CONFIG ======
-    // Your masterlist JSON saved in this repo:
-    // assets/data/employee master.json  <-- space must be URL encoded
-    const EMPLOYEE_MASTER_JSON = "./assets/data/employee%20master.json";
+<script>
+/* 👤 USER */
+document.getElementById("empName").innerText =
+  localStorage.getItem("fullName");
 
-    // If you want attendance to go to n8n later, put your webhook here:
-    // (leave blank if you don't want it yet)
-    const ATTENDANCE_WEBHOOK_URL = ""; // e.g. "https://tumbletech.app.n8n.cloud/webhook/attendance"
+/* 🕒 CLOCKS */
+const WORK_TIMEZONE = "Asia/Manila";
 
-    // ====== SESSION GUARD ======
-    const sessionUserID = localStorage.getItem("userID");
-    if (!sessionUserID) {
-      window.location.href = "login.html";
-    }
+function updateClocks() {
+  const now = new Date();
 
-    // ====== CLOCKS ======
-    const workTzSelect = document.getElementById("workTz");
-    const savedWorkTz = localStorage.getItem("workTz") || "Asia/Manila";
-    workTzSelect.value = savedWorkTz;
+  document.getElementById("localClock").innerText =
+    now.toLocaleTimeString();
 
-    workTzSelect.addEventListener("change", () => {
-      localStorage.setItem("workTz", workTzSelect.value);
-    });
+  document.getElementById("workClock").innerText =
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: WORK_TIMEZONE,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).format(now);
+}
 
-    function tickClocks() {
-      const now = new Date();
-      document.getElementById("localClock").textContent =
-        now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+setInterval(updateClocks, 1000);
+updateClocks();
 
-      const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local";
-      document.getElementById("localTzLabel").textContent = localTz;
+/* 🧾 ATTENDANCE (placeholder for n8n) */
+function logAttendance(action) {
+  const now = new Date();
 
-      const workTz = workTzSelect.value;
-      document.getElementById("workClock").textContent =
-        now.toLocaleTimeString("en-US", { timeZone: workTz, hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    }
-    setInterval(tickClocks, 500);
-    tickClocks();
+  const payload = {
+    userID: localStorage.getItem("userID"),
+    action: action,
+    local_time: now.toLocaleTimeString(),
+    work_time: document.getElementById("workClock").innerText,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+  };
 
-    // ====== LOAD EMPLOYEE MASTERLIST ======
-    async function loadEmployeeProfile() {
-      // show whatever login already stored (fast UI), then override with masterlist (truth source)
-      const quickName = localStorage.getItem("fullName") || sessionUserID;
-      document.getElementById("fullNameText").textContent = quickName;
-      document.getElementById("empMeta").textContent = `userID: ${sessionUserID}`;
+  console.log("Attendance:", payload);
 
-      try {
-        const res = await fetch(EMPLOYEE_MASTER_JSON, { cache: "no-store" });
-        if (!res.ok) throw new Error("Masterlist JSON not found / not accessible");
-        const employees = await res.json();
+  document.getElementById("lastAction").innerText =
+    `Last action: ${action.replace('_',' ')} – ${payload.work_time} (Work Time)`;
+}
 
-        const emp = employees.find(e => (e.user_id || e.userID) === sessionUserID);
-        if (!emp) {
-          // if user somehow got here without being in the masterlist
-          alert("Your account is not found in the employee masterlist. Please contact admin.");
-          logout();
-          return;
-        }
+/* 🌴 LEAVE SUBMISSION (placeholder for n8n) */
+function submitLeave() {
+  const payload = {
+    userID: localStorage.getItem("userID"),
+    type: document.getElementById("leaveType").value,
+    from: document.getElementById("leaveFrom").value,
+    to: document.getElementById("leaveTo").value,
+    note: document.getElementById("leaveNote").value,
+    status: "Pending"
+  };
 
-        const fullName = emp.full_name || emp.fullName || quickName;
-        localStorage.setItem("fullName", fullName);
+  console.log("Leave Request:", payload);
+  alert("Leave request submitted.");
+}
 
-        document.getElementById("fullNameText").textContent = fullName;
+/* 🚪 LOGOUT */
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+</script>
 
-        const empNo = emp.employee_no || emp.Employee_No || "";
-        const dept = emp.department || "";
-        const pos = emp.position || "";
-        document.getElementById("empMeta").textContent = `${empNo} • ${dept} • ${pos}`;
-
-        // OPTIONAL: approver flag (add later in your JSON if you want)
-        // e.g. "is_approver": true
-        if (emp.is_approver === true) {
-          document.getElementById("approverPanel").classList.remove("d-none");
-        }
-
-      } catch (err) {
-        console.error(err);
-        // fallback: still usable with the localStorage name
-        document.getElementById("empMeta").textContent = `userID: ${sessionUserID} (masterlist load failed)`;
-      }
-    }
-    loadEmployeeProfile();
-
-    // ====== ATTENDANCE (optional n8n later) ======
-    async function sendAttendance(action) {
-      const workTz = localStorage.getItem("workTz") || "Asia/Manila";
-      const now = new Date();
-      const workTimeStr = now.toLocaleTimeString("en-US", {
-        timeZone: workTz, hour:
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
