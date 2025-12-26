@@ -15,36 +15,37 @@
       padding: 14px 16px;
       border-radius: 10px;
       display:flex;
-      align-items:center;
       justify-content:space-between;
-      gap: 12px;
+      align-items:center;
+      gap:12px;
     }
-    .clockbox {
-      display:flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content:flex-end;
-    }
+    .clockbox { display:flex; gap:12px; }
     .clock {
       background: rgba(255,255,255,.08);
       padding: 8px 10px;
       border-radius: 10px;
       min-width: 210px;
-      line-height: 1.2;
     }
-    .clock small { opacity: .8; display:block; }
+    .clock small { opacity:.8; display:block; }
     .card { border-radius: 12px; }
-    .btn-wide { width: 100%; }
+    .btn-wide { width:100%; }
     .muted { color:#6c757d; }
     .pill {
-      display:inline-block; padding:4px 10px; border-radius: 999px;
-      background:#eef1f4; font-size: 12px;
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      background:#eef1f4;
+      font-size:12px;
     }
     .record-row {
       display:flex;
       justify-content:space-between;
       padding:8px 0;
       border-bottom:1px solid #e5e7eb;
+    }
+    button:disabled {
+      cursor:not-allowed;
+      opacity:.6;
     }
   </style>
 </head>
@@ -58,7 +59,7 @@
       <div class="fs-5 fw-semibold">Employee Dashboard</div>
       <div class="muted" style="color:rgba(255,255,255,.65)!important">
         Welcome, <span id="fullNameText">Employee</span>
-        <span class="ms-2 pill" id="empMeta">Build Mode</span>
+        <span class="ms-2 pill">Build Mode</span>
       </div>
     </div>
 
@@ -72,15 +73,12 @@
       <div class="clock">
         <small>Work Time</small>
         <div class="fw-semibold" id="workClock">--:--:--</div>
-        <div class="d-flex align-items-center gap-2 mt-1">
-          <small class="m-0">TZ:</small>
-          <select id="workTz" class="form-select form-select-sm">
-            <option value="Asia/Manila">Asia/Manila</option>
-            <option value="America/New_York">America/New_York</option>
-            <option value="America/Chicago">America/Chicago</option>
-            <option value="America/Los_Angeles">America/Los_Angeles</option>
-          </select>
-        </div>
+        <select id="workTz" class="form-select form-select-sm mt-1">
+          <option value="Asia/Manila">Asia/Manila</option>
+          <option value="America/New_York">America/New_York</option>
+          <option value="America/Chicago">America/Chicago</option>
+          <option value="America/Los_Angeles">America/Los_Angeles</option>
+        </select>
       </div>
     </div>
   </div>
@@ -90,18 +88,26 @@
     <div class="card-body">
       <h5>Attendance</h5>
       <div class="row g-2 mt-2">
-        <div class="col-6 col-md-3"><button class="btn btn-success btn-wide" onclick="logAction('TIME IN')">Time In</button></div>
-        <div class="col-6 col-md-3"><button class="btn btn-warning btn-wide" onclick="logAction('BREAK OUT')">Break Out</button></div>
-        <div class="col-6 col-md-3"><button class="btn btn-info btn-wide" onclick="logAction('BREAK IN')">Break In</button></div>
-        <div class="col-6 col-md-3"><button class="btn btn-danger btn-wide" onclick="logAction('TIME OUT')">Time Out</button></div>
+        <div class="col-6 col-md-3">
+          <button id="btnTimeIn" class="btn btn-success btn-wide" onclick="logAction('TIME_IN')">Time In</button>
+        </div>
+        <div class="col-6 col-md-3">
+          <button id="btnBreakOut" class="btn btn-warning btn-wide" onclick="logAction('BREAK_OUT')">Break Out</button>
+        </div>
+        <div class="col-6 col-md-3">
+          <button id="btnBreakIn" class="btn btn-info btn-wide" onclick="logAction('BREAK_IN')">Break In</button>
+        </div>
+        <div class="col-6 col-md-3">
+          <button id="btnTimeOut" class="btn btn-danger btn-wide" onclick="logAction('TIME_OUT')">Time Out</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ATTENDANCE RECORD (TODAY) -->
+  <!-- ATTENDANCE RECORD -->
   <div class="card mb-3">
     <div class="card-body">
-      <h5 class="mb-3">Attendance Record (Today)</h5>
+      <h5>Attendance Record (Today)</h5>
 
       <div class="record-row"><span>Time In</span><span id="recTimeIn" class="muted">Standby</span></div>
       <div class="record-row"><span>Break Out</span><span id="recBreakOut" class="muted">Standby</span></div>
@@ -154,34 +160,49 @@
 </div>
 
 <script>
+/* ===== CLOCKS ===== */
 const workTz = document.getElementById("workTz");
-
 function updateClocks() {
   const now = new Date();
-  document.getElementById("localClock").textContent = now.toLocaleTimeString();
-  document.getElementById("localTzLabel").textContent =
-    Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-  document.getElementById("workClock").textContent =
-    now.toLocaleTimeString("en-US", { timeZone: workTz.value });
+  localClock.textContent = now.toLocaleTimeString();
+  localTzLabel.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  workClock.textContent = now.toLocaleTimeString("en-US", { timeZone: workTz.value });
 }
 setInterval(updateClocks, 1000);
 updateClocks();
 
+/* ===== ATTENDANCE STATE ===== */
+let state = JSON.parse(localStorage.getItem("attendanceState")) || {
+  timeIn:false,
+  breakOut:false,
+  breakIn:false,
+  timeOut:false
+};
+
+function updateButtons() {
+  btnTimeIn.disabled = state.timeIn;
+  btnBreakOut.disabled = !state.timeIn || state.breakOut || state.timeOut;
+  btnBreakIn.disabled = !state.breakOut || state.timeOut;
+  btnTimeOut.disabled = !state.timeIn || state.breakOut || state.timeOut;
+}
+updateButtons();
+
 function logAction(action) {
   const time = new Date().toLocaleTimeString("en-US", {
     timeZone: workTz.value,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
+    hour:"2-digit", minute:"2-digit", second:"2-digit"
   });
 
-  if (action === "TIME IN") recTimeIn.textContent = time;
-  if (action === "BREAK OUT") recBreakOut.textContent = time;
-  if (action === "BREAK IN") recBreakIn.textContent = time;
-  if (action === "TIME OUT") recTimeOut.textContent = time;
+  if (action === "TIME_IN") { state.timeIn = true; recTimeIn.textContent = time; }
+  if (action === "BREAK_OUT") { state.breakOut = true; recBreakOut.textContent = time; }
+  if (action === "BREAK_IN") { state.breakOut = false; state.breakIn = true; recBreakIn.textContent = time; }
+  if (action === "TIME_OUT") { state.timeOut = true; recTimeOut.textContent = time; }
+
+  localStorage.setItem("attendanceState", JSON.stringify(state));
+  updateButtons();
 }
 
+/* ===== LEAVE ===== */
 function submitLeave(e) {
   e.preventDefault();
   alert("Leave request submitted (demo).");
