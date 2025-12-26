@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tumbletech Attendance Portal</title>
+  <title>Login - Tumbletech Employee Portal</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -11,116 +11,92 @@
     body {
       background-color: #f0f2f5;
     }
-    .card {
-      max-width: 500px;
+    .login-card {
+      max-width: 400px;
       margin: auto;
-      margin-top: 8%;
+      margin-top: 10%;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       border-radius: 10px;
+    }
+    .login-card .card-header {
+      font-weight: 600;
+      text-align: center;
+      font-size: 1.5rem;
     }
   </style>
 </head>
 
 <body>
 
-<!-- 🔒 LOGIN GUARD -->
-<script>
-if (!localStorage.getItem("userID")) {
-  window.location.href = "login.html";
-}
-</script>
-
-<!-- 🕒 CLOCKS -->
-<div class="position-fixed top-0 end-0 p-3 text-end">
-  <div class="fw-bold">Local Time</div>
-  <div id="localClock" class="fs-5"></div>
-
-  <div class="fw-bold mt-2">Work Time</div>
-  <div id="workClock" class="fs-5"></div>
-</div>
-
 <div class="container">
-  <div class="card">
-    <div class="card-header bg-dark text-white text-center fw-bold fs-5">
-      Attendance Tracker
+  <div class="card login-card">
+    <div class="card-header bg-dark text-white">
+      Tumbletech Login
     </div>
 
-    <div class="card-body text-center">
-      <h5 class="mb-3">
-        Welcome, <span id="empName"></span>
-      </h5>
+    <div class="card-body">
+      <form onsubmit="handleLogin(event)">
+        <div class="mb-3">
+          <label for="userID" class="form-label">User ID</label>
+          <input type="text" class="form-control" id="userID" required>
+        </div>
 
-      <button class="btn btn-success w-100 mb-2" onclick="logAttendance('TIME_IN')">
-        Time In
-      </button>
+        <div class="mb-3">
+          <label for="accessCode" class="form-label">Access Code</label>
+          <input type="password" class="form-control" id="accessCode" required>
+        </div>
 
-      <button class="btn btn-danger w-100 mb-2" onclick="logAttendance('TIME_OUT')">
-        Time Out
-      </button>
-
-      <div id="lastAction" class="mt-3 text-muted"></div>
-
-      <button class="btn btn-outline-secondary w-100 mt-4" onclick="logout()">
-        Logout
-      </button>
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-dark">Login</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
 
 <script>
-/* 👤 USER INFO */
-document.getElementById("empName").innerText =
-  localStorage.getItem("fullName");
+async function handleLogin(event) {
+  event.preventDefault();
 
-/* 🕒 CLOCK LOGIC */
-const WORK_TIMEZONE = "Asia/Manila";
+  const userID = document.getElementById("userID").value.trim();
+  const accessCode = document.getElementById("accessCode").value.trim();
 
-function updateClocks() {
-  const now = new Date();
+  if (!userID || !accessCode) {
+    alert("Please enter User ID and Access Code.");
+    return;
+  }
 
-  document.getElementById("localClock").innerText =
-    now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  try {
+    const response = await fetch(
+      "https://tumbletech.app.n8n.cloud/webhook-test/login",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userID: userID,
+          access_code: accessCode
+        })
+      }
+    );
 
-  document.getElementById("workClock").innerText =
-    new Intl.DateTimeFormat("en-US", {
-      timeZone: WORK_TIMEZONE,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    }).format(now);
-}
+    const result = await response.json();
 
-setInterval(updateClocks, 1000);
-updateClocks();
+    if (!result.allowed) {
+      alert(result.reason || "Invalid credentials");
+      return;
+    }
 
-/* 🧾 ATTENDANCE (placeholder – wire to n8n next) */
-function logAttendance(action) {
-  const now = new Date();
+    // ✅ Save session
+    localStorage.setItem("userID", result.userID);
+    localStorage.setItem("fullName", result.fullName);
 
-  const localTime = now.toLocaleTimeString();
-  const workTime = new Intl.DateTimeFormat("en-US", {
-    timeZone: WORK_TIMEZONE,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  }).format(now);
+    // ✅ Redirect to attendance
+    window.location.href = "index.html";
 
-  document.getElementById("lastAction").innerText =
-    `Last action: ${action.replace('_', ' ')} – ${workTime} (Work Time)`;
-
-  console.log({
-    userID: localStorage.getItem("userID"),
-    action: action,
-    local_time: localTime,
-    work_time: workTime,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-  });
-}
-
-/* 🚪 LOGOUT */
-function logout() {
-  localStorage.clear();
-  window.location.href = "login.html";
+  } catch (error) {
+    console.error(error);
+    alert("System error. Please try again.");
+  }
 }
 </script>
 
