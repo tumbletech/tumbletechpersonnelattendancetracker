@@ -171,8 +171,8 @@ function updateClocks() {
 setInterval(updateClocks, 1000);
 updateClocks();
 
-/* ===== ATTENDANCE STATE ===== */
-let state = JSON.parse(localStorage.getItem("attendanceState")) || {
+/* ===== ATTENDANCE STATE (BUILD MODE: MEMORY ONLY) ===== */
+let state = {
   timeIn:false,
   breakOut:false,
   breakIn:false,
@@ -198,7 +198,6 @@ function logAction(action) {
   if (action === "BREAK_IN") { state.breakOut = false; state.breakIn = true; recBreakIn.textContent = time; }
   if (action === "TIME_OUT") { state.timeOut = true; recTimeOut.textContent = time; }
 
-  localStorage.setItem("attendanceState", JSON.stringify(state));
   updateButtons();
 }
 
