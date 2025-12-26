@@ -12,8 +12,8 @@
     .topbar {
       background:#1f2328;
       color:#fff;
-      padding: 14px 16px;
-      border-radius: 10px;
+      padding:14px 16px;
+      border-radius:10px;
       display:flex;
       justify-content:space-between;
       align-items:center;
@@ -21,13 +21,13 @@
     }
     .clockbox { display:flex; gap:12px; }
     .clock {
-      background: rgba(255,255,255,.08);
-      padding: 8px 10px;
-      border-radius: 10px;
-      min-width: 210px;
+      background:rgba(255,255,255,.08);
+      padding:8px 10px;
+      border-radius:10px;
+      min-width:210px;
     }
     .clock small { opacity:.8; display:block; }
-    .card { border-radius: 12px; }
+    .card { border-radius:12px; }
     .btn-wide { width:100%; }
     .muted { color:#6c757d; }
     .pill {
@@ -43,10 +43,7 @@
       padding:8px 0;
       border-bottom:1px solid #e5e7eb;
     }
-    button:disabled {
-      cursor:not-allowed;
-      opacity:.6;
-    }
+    button:disabled { cursor:not-allowed; opacity:.6; }
   </style>
 </head>
 
@@ -160,8 +157,16 @@
 </div>
 
 <script>
-/* ===== CLOCKS ===== */
+/* ================= CONFIG ================= */
+const ATTENDANCE_WEBHOOK_URL = ""; 
+// Example later:
+// https://tumbletech.app.n8n.cloud/webhook/attendance
+
+const userID = localStorage.getItem("userID") || "demo_user";
+
+/* ================= CLOCKS ================= */
 const workTz = document.getElementById("workTz");
+
 function updateClocks() {
   const now = new Date();
   localClock.textContent = now.toLocaleTimeString();
@@ -171,7 +176,7 @@ function updateClocks() {
 setInterval(updateClocks, 1000);
 updateClocks();
 
-/* ===== ATTENDANCE STATE (BUILD MODE: MEMORY ONLY) ===== */
+/* ============ ATTENDANCE STATE ============ */
 let state = {
   timeIn:false,
   breakOut:false,
@@ -187,21 +192,42 @@ function updateButtons() {
 }
 updateButtons();
 
-function logAction(action) {
-  const time = new Date().toLocaleTimeString("en-US", {
+/* ============ ATTENDANCE LOGIC ============ */
+async function logAction(action) {
+  const now = new Date();
+  const workTime = now.toLocaleTimeString("en-US", {
     timeZone: workTz.value,
     hour:"2-digit", minute:"2-digit", second:"2-digit"
   });
 
-  if (action === "TIME_IN") { state.timeIn = true; recTimeIn.textContent = time; }
-  if (action === "BREAK_OUT") { state.breakOut = true; recBreakOut.textContent = time; }
-  if (action === "BREAK_IN") { state.breakOut = false; state.breakIn = true; recBreakIn.textContent = time; }
-  if (action === "TIME_OUT") { state.timeOut = true; recTimeOut.textContent = time; }
+  if (action === "TIME_IN") { state.timeIn = true; recTimeIn.textContent = workTime; }
+  if (action === "BREAK_OUT") { state.breakOut = true; recBreakOut.textContent = workTime; }
+  if (action === "BREAK_IN") { state.breakOut = false; state.breakIn = true; recBreakIn.textContent = workTime; }
+  if (action === "TIME_OUT") { state.timeOut = true; recTimeOut.textContent = workTime; }
 
   updateButtons();
+
+  /* ===== SEND TO n8n (non-blocking) ===== */
+  if (!ATTENDANCE_WEBHOOK_URL) return;
+
+  try {
+    fetch(ATTENDANCE_WEBHOOK_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        userID,
+        action,
+        work_timezone: workTz.value,
+        local_timestamp: now.toISOString(),
+        work_time_display: workTime
+      })
+    });
+  } catch (err) {
+    console.error("Attendance webhook failed:", err);
+  }
 }
 
-/* ===== LEAVE ===== */
+/* ================= LEAVE ================= */
 function submitLeave(e) {
   e.preventDefault();
   alert("Leave request submitted (demo).");
@@ -211,6 +237,3 @@ function submitLeave(e) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
-
