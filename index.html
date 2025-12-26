@@ -40,307 +40,154 @@
       display:inline-block; padding:4px 10px; border-radius: 999px;
       background:#eef1f4; font-size: 12px;
     }
+    .record-row {
+      display:flex;
+      justify-content:space-between;
+      padding:8px 0;
+      border-bottom:1px solid #e5e7eb;
+    }
   </style>
 </head>
 
 <body>
-  <div class="container my-4">
+<div class="container my-4">
 
-    <!-- TOP BAR -->
-    <div class="topbar mb-3">
-      <div>
-        <div class="fs-5 fw-semibold">Employee Dashboard</div>
-        <div class="muted" style="color:rgba(255,255,255,.65)!important">
-          Welcome, <span id="fullNameText">...</span>
-          <span class="ms-2 pill" id="empMeta">Loading...</span>
-        </div>
-      </div>
-
-      <div class="clockbox">
-        <div class="clock">
-          <small>Local Time</small>
-          <div class="fw-semibold" id="localClock">--:--:--</div>
-          <small id="localTzLabel">Device timezone</small>
-        </div>
-
-        <div class="clock">
-          <small>Work Time</small>
-          <div class="fw-semibold" id="workClock">--:--:--</div>
-          <div class="d-flex align-items-center gap-2 mt-1">
-            <small class="m-0">TZ:</small>
-            <select id="workTz" class="form-select form-select-sm" style="max-width: 170px;">
-              <!-- common defaults -->
-              <option value="Asia/Manila">Asia/Manila</option>
-              <option value="America/Chicago">America/Chicago</option>
-              <option value="America/New_York">America/New_York</option>
-              <option value="America/Los_Angeles">America/Los_Angeles</option>
-              <option value="Europe/London">Europe/London</option>
-              <option value="Asia/Dubai">Asia/Dubai</option>
-              <option value="Asia/Singapore">Asia/Singapore</option>
-            </select>
-          </div>
-        </div>
+  <!-- TOP BAR -->
+  <div class="topbar mb-3">
+    <div>
+      <div class="fs-5 fw-semibold">Employee Dashboard</div>
+      <div class="muted" style="color:rgba(255,255,255,.65)!important">
+        Welcome, <span id="fullNameText">Employee</span>
+        <span class="ms-2 pill" id="empMeta">Build Mode</span>
       </div>
     </div>
 
-    <!-- ATTENDANCE -->
-    <div class="card mb-3">
-      <div class="card-body">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <h5 class="m-0">Attendance</h5>
-          <div class="muted">Last action: <span id="lastAction">None</span></div>
-        </div>
-
-        <div class="row g-2 mt-2">
-          <div class="col-6 col-md-3"><button class="btn btn-success btn-wide" onclick="sendAttendance('TIME_IN')">Time In</button></div>
-          <div class="col-6 col-md-3"><button class="btn btn-warning btn-wide" onclick="sendAttendance('BREAK_OUT')">Break Out</button></div>
-          <div class="col-6 col-md-3"><button class="btn btn-info btn-wide" onclick="sendAttendance('BREAK_IN')">Break In</button></div>
-          <div class="col-6 col-md-3"><button class="btn btn-danger btn-wide" onclick="sendAttendance('TIME_OUT')">Time Out</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- LEAVE -->
-    <div class="row g-3">
-      <div class="col-lg-6">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="mb-3">Leave Balance</h5>
-            <!-- demo defaults; you can later load these from Sheets -->
-            <div class="d-flex justify-content-between border-bottom py-2">
-              <div>Vacation Leave</div><div class="fw-semibold" id="vlBal">7</div>
-            </div>
-            <div class="d-flex justify-content-between border-bottom py-2">
-              <div>Sick Leave</div><div class="fw-semibold" id="slBal">7</div>
-            </div>
-            <div class="d-flex justify-content-between py-2">
-              <div>Emergency Leave</div><div class="fw-semibold" id="elBal">3</div>
-            </div>
-            <div class="small muted mt-2">
-              Note: Balances are demo values for now. You can wire this to Sheets later.
-            </div>
-          </div>
-        </div>
+    <div class="clockbox">
+      <div class="clock">
+        <small>Local Time</small>
+        <div class="fw-semibold" id="localClock">--:--:--</div>
+        <small id="localTzLabel">Device TZ</small>
       </div>
 
-      <div class="col-lg-6">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="mb-3">File Leave</h5>
-
-            <form onsubmit="submitLeave(event)">
-              <div class="mb-2">
-                <label class="form-label">Leave Type</label>
-                <select id="leaveType" class="form-select" required>
-                  <option value="">Select...</option>
-                  <option value="VACATION">Vacation</option>
-                  <option value="SICK">Sick</option>
-                  <option value="EMERGENCY">Emergency</option>
-                  <option value="OTHER">Other</option>
-                </select>
-              </div>
-
-              <div class="row g-2">
-                <div class="col-6">
-                  <label class="form-label">Start Date</label>
-                  <input id="leaveStart" type="date" class="form-control" required>
-                </div>
-                <div class="col-6">
-                  <label class="form-label">End Date</label>
-                  <input id="leaveEnd" type="date" class="form-control" required>
-                </div>
-              </div>
-
-              <div class="mt-2">
-                <label class="form-label">Reason</label>
-                <textarea id="leaveReason" class="form-control" rows="2" placeholder="Optional but recommended"></textarea>
-              </div>
-
-              <div class="d-grid mt-3">
-                <button class="btn btn-dark" type="submit">Submit Leave Request</button>
-              </div>
-            </form>
-
-            <hr>
-
-            <h6 class="mb-2">My Leave Requests</h6>
-            <div class="small muted mb-2">Demo list. Wire to Sheets later.</div>
-            <ul class="list-group" id="leaveList">
-              <li class="list-group-item d-flex justify-content-between">
-                <span>VACATION (Jan 10–Jan 12)</span>
-                <span class="badge text-bg-warning">Pending</span>
-              </li>
-            </ul>
-          </div>
+      <div class="clock">
+        <small>Work Time</small>
+        <div class="fw-semibold" id="workClock">--:--:--</div>
+        <div class="d-flex align-items-center gap-2 mt-1">
+          <small class="m-0">TZ:</small>
+          <select id="workTz" class="form-select form-select-sm">
+            <option value="Asia/Manila">Asia/Manila</option>
+            <option value="America/New_York">America/New_York</option>
+            <option value="America/Chicago">America/Chicago</option>
+            <option value="America/Los_Angeles">America/Los_Angeles</option>
+          </select>
         </div>
       </div>
-    </div>
-
-    <!-- APPROVER (optional, hidden by default) -->
-    <div class="card mt-3 d-none" id="approverPanel">
-      <div class="card-body">
-        <h5 class="mb-2">Approver Panel</h5>
-        <div class="muted small mb-3">Visible only if your employee record says you are an approver.</div>
-        <button class="btn btn-outline-primary" onclick="alert('Approver flow: coming soon / client-configurable')">
-          Open Leave Approval
-        </button>
-      </div>
-    </div>
-
-    <div class="text-center mt-4">
-      <button class="btn btn-outline-secondary btn-sm" onclick="logout()">Logout</button>
     </div>
   </div>
 
-  <script>
-    // ====== CONFIG ======
-    // Your masterlist JSON saved in this repo:
-    // assets/data/employee master.json  <-- space must be URL encoded
-    const EMPLOYEE_MASTER_JSON = "./assets/data/employee%20master.json";
+  <!-- ATTENDANCE ACTIONS -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5>Attendance</h5>
+      <div class="row g-2 mt-2">
+        <div class="col-6 col-md-3"><button class="btn btn-success btn-wide" onclick="logAction('TIME IN')">Time In</button></div>
+        <div class="col-6 col-md-3"><button class="btn btn-warning btn-wide" onclick="logAction('BREAK OUT')">Break Out</button></div>
+        <div class="col-6 col-md-3"><button class="btn btn-info btn-wide" onclick="logAction('BREAK IN')">Break In</button></div>
+        <div class="col-6 col-md-3"><button class="btn btn-danger btn-wide" onclick="logAction('TIME OUT')">Time Out</button></div>
+      </div>
+    </div>
+  </div>
 
-    // If you want attendance to go to n8n later, put your webhook here:
-    // (leave blank if you don't want it yet)
-    const ATTENDANCE_WEBHOOK_URL = ""; // e.g. "https://tumbletech.app.n8n.cloud/webhook/attendance"
+  <!-- ATTENDANCE RECORD (TODAY) -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="mb-3">Attendance Record (Today)</h5>
 
-    // ====== SESSION GUARD ======
-    const sessionUserID = localStorage.getItem("userID");
-    if (!sessionUserID) {
-      window.location.href = "login.html";
-    }
+      <div class="record-row"><span>Time In</span><span id="recTimeIn" class="muted">Standby</span></div>
+      <div class="record-row"><span>Break Out</span><span id="recBreakOut" class="muted">Standby</span></div>
+      <div class="record-row"><span>Break In</span><span id="recBreakIn" class="muted">Standby</span></div>
+      <div class="record-row"><span>Time Out</span><span id="recTimeOut" class="muted">Standby</span></div>
 
-    // ====== CLOCKS ======
-    const workTzSelect = document.getElementById("workTz");
-    const savedWorkTz = localStorage.getItem("workTz") || "Asia/Manila";
-    workTzSelect.value = savedWorkTz;
+      <div class="d-grid mt-3">
+        <button class="btn btn-outline-secondary">Download Records</button>
+      </div>
+    </div>
+  </div>
 
-    workTzSelect.addEventListener("change", () => {
-      localStorage.setItem("workTz", workTzSelect.value);
-    });
+  <!-- LEAVE -->
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5>Leave Balance</h5>
+          <div class="record-row"><span>Vacation Leave</span><strong>7</strong></div>
+          <div class="record-row"><span>Sick Leave</span><strong>7</strong></div>
+          <div class="record-row"><span>Emergency Leave</span><strong>3</strong></div>
+          <small class="muted">Demo values. Wire to Sheets later.</small>
+        </div>
+      </div>
+    </div>
 
-    function tickClocks() {
-      const now = new Date();
-      document.getElementById("localClock").textContent =
-        now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5>File Leave</h5>
+          <form onsubmit="submitLeave(event)">
+            <select class="form-select mb-2" required>
+              <option value="">Leave Type</option>
+              <option>Vacation</option>
+              <option>Sick</option>
+              <option>Emergency</option>
+            </select>
+            <div class="row g-2 mb-2">
+              <div class="col"><input type="date" class="form-control" required></div>
+              <div class="col"><input type="date" class="form-control" required></div>
+            </div>
+            <textarea class="form-control mb-2" placeholder="Reason (optional)"></textarea>
+            <button class="btn btn-dark w-100">Submit Leave Request</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local";
-      document.getElementById("localTzLabel").textContent = localTz;
+</div>
 
-      const workTz = workTzSelect.value;
-      document.getElementById("workClock").textContent =
-        now.toLocaleTimeString("en-US", { timeZone: workTz, hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    }
-    setInterval(tickClocks, 500);
-    tickClocks();
+<script>
+const workTz = document.getElementById("workTz");
 
-    // ====== LOAD EMPLOYEE MASTERLIST ======
-    async function loadEmployeeProfile() {
-      // show whatever login already stored (fast UI), then override with masterlist (truth source)
-      const quickName = localStorage.getItem("fullName") || sessionUserID;
-      document.getElementById("fullNameText").textContent = quickName;
-      document.getElementById("empMeta").textContent = `userID: ${sessionUserID}`;
+function updateClocks() {
+  const now = new Date();
+  document.getElementById("localClock").textContent = now.toLocaleTimeString();
+  document.getElementById("localTzLabel").textContent =
+    Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      try {
-        const res = await fetch(EMPLOYEE_MASTER_JSON, { cache: "no-store" });
-        if (!res.ok) throw new Error("Masterlist JSON not found / not accessible");
-        const employees = await res.json();
+  document.getElementById("workClock").textContent =
+    now.toLocaleTimeString("en-US", { timeZone: workTz.value });
+}
+setInterval(updateClocks, 1000);
+updateClocks();
 
-        const emp = employees.find(e => (e.user_id || e.userID) === sessionUserID);
-        if (!emp) {
-          console.warn("User not found in masterlist yet. Build mode: allowing access.");
-        
-          document.getElementById("empMeta").textContent =
-            `userID: ${sessionUserID} (build mode)`;
-        
-          // Just exit this function, don't logout
-          return;
-        }
+function logAction(action) {
+  const time = new Date().toLocaleTimeString("en-US", {
+    timeZone: workTz.value,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
 
+  if (action === "TIME IN") recTimeIn.textContent = time;
+  if (action === "BREAK OUT") recBreakOut.textContent = time;
+  if (action === "BREAK IN") recBreakIn.textContent = time;
+  if (action === "TIME OUT") recTimeOut.textContent = time;
+}
 
-        const fullName = emp.full_name || emp.fullName || quickName;
-        localStorage.setItem("fullName", fullName);
+function submitLeave(e) {
+  e.preventDefault();
+  alert("Leave request submitted (demo).");
+}
+</script>
 
-        document.getElementById("fullNameText").textContent = fullName;
-
-        const empNo = emp.employee_no || emp.Employee_No || "";
-        const dept = emp.department || "";
-        const pos = emp.position || "";
-        document.getElementById("empMeta").textContent = `${empNo} • ${dept} • ${pos}`;
-
-        // OPTIONAL: approver flag (add later in your JSON if you want)
-        // e.g. "is_approver": true
-        if (emp.is_approver === true) {
-          document.getElementById("approverPanel").classList.remove("d-none");
-        }
-
-      } catch (err) {
-        console.error(err);
-        // fallback: still usable with the localStorage name
-        document.getElementById("empMeta").textContent = `userID: ${sessionUserID} (masterlist load failed)`;
-      }
-    }
-    loadEmployeeProfile();
-
-    // ====== ATTENDANCE (optional n8n later) ======
-    async function sendAttendance(action) {
-      const workTz = localStorage.getItem("workTz") || "Asia/Manila";
-      const now = new Date();
-      const workTimeStr = now.toLocaleTimeString("en-US", {
-        timeZone: workTz, hour: "2-digit", minute: "2-digit", second: "2-digit"
-      });
-
-      document.getElementById("lastAction").textContent = `${action.replace("_"," ")} — ${workTimeStr} (Work Time)`;
-
-      if (!ATTENDANCE_WEBHOOK_URL) {
-        // demo mode
-        return;
-      }
-
-      try {
-        await fetch(ATTENDANCE_WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userID: sessionUserID,
-            action,
-            work_tz: workTz,
-            client_ts: new Date().toISOString()
-          })
-        });
-      } catch (e) {
-        console.error(e);
-        alert("Attendance logging failed. Please try again.");
-      }
-    }
-
-    // ====== LEAVE SUBMISSION (demo placeholder) ======
-    function submitLeave(event) {
-      event.preventDefault();
-
-      const type = document.getElementById("leaveType").value;
-      const start = document.getElementById("leaveStart").value;
-      const end = document.getElementById("leaveEnd").value;
-
-      if (!type || !start || !end) return;
-
-      const li = document.createElement("li");
-      li.className = "list-group-item d-flex justify-content-between";
-      li.innerHTML = `<span>${type} (${start}–${end})</span><span class="badge text-bg-warning">Pending</span>`;
-      document.getElementById("leaveList").prepend(li);
-
-      event.target.reset();
-      alert("Leave request submitted (demo). Wire to Google Sheets later.");
-    }
-
-    function logout() {
-      localStorage.removeItem("userID");
-      localStorage.removeItem("fullName");
-      // keep workTz (nice UX), or remove if you want:
-      // localStorage.removeItem("workTz");
-      window.location.href = "login.html";
-    }
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
