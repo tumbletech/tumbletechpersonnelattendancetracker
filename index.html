@@ -2,212 +2,123 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Employee Attendance</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tumbletech Employee Portal - Dashboard</title>
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
-    body { background:#f0f2f5; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #f3f4f6;
+      padding: 16px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
     .topbar {
-      background:#1f2328;
-      color:#fff;
-      padding:14px 16px;
-      border-radius:10px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
+      background: #1f2933;
+      color: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
     }
-    .clockbox { display:flex; gap:12px; }
-    .clock {
-      background:rgba(255,255,255,.08);
-      padding:8px 10px;
-      border-radius:10px;
-      min-width:210px;
+    .muted { color: #9ca3af; font-size: 14px; }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
     }
-    .clock small { opacity:.8; display:block; }
-    .card { border-radius:12px; }
-    .btn-wide { width:100%; }
-    .muted { color:#6c757d; }
-    .pill {
-      display:inline-block;
-      padding:4px 10px;
-      border-radius:999px;
-      background:#eef1f4;
-      font-size:12px;
-      color:#000;
-    }
-    .record-row {
-      display:flex;
-      justify-content:space-between;
-      padding:8px 0;
-      border-bottom:1px solid #e5e7eb;
-    }
-    button:disabled { cursor:not-allowed; opacity:.6; }
+    .timein { background:#2f855a; color:#fff; }
+    .breakout { background:#ecc94b; }
+    .breakin { background:#63d2ee; }
+    .timeout { background:#e53e3e; color:#fff; }
   </style>
 </head>
-
 <body>
-<div class="container my-4">
 
-  <!-- TOP BAR -->
-  <div class="topbar mb-3">
-    <div>
-      <div class="fs-5 fw-semibold">Employee Dashboard</div>
-      <div class="muted" style="color:rgba(255,255,255,.65)!important">
-        Welcome, <span id="fullNameText">Employee</span>
-        <span class="ms-2 pill">Build Mode</span>
-      </div>
-    </div>
-
-    <div class="clockbox">
-      <div class="clock">
-        <small>Local Time</small>
-        <div class="fw-semibold" id="localClock">--:--:--</div>
-        <small id="localTzLabel">Device TZ</small>
-      </div>
-
-      <div class="clock">
-        <small>Work Time</small>
-        <div class="fw-semibold" id="workClock">--:--:--</div>
-        <select id="workTz" class="form-select form-select-sm mt-1">
-          <option value="Asia/Manila">Asia/Manila</option>
-          <option value="America/New_York">America/New_York</option>
-          <option value="America/Chicago">America/Chicago</option>
-          <option value="America/Los_Angeles">America/Los_Angeles</option>
-        </select>
-      </div>
-    </div>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div style="font-size:18px;font-weight:700">Employee Dashboard</div>
+  <div class="muted">
+    Welcome, <span id="fullNameText">Employee</span>
   </div>
+</div>
 
-  <!-- ATTENDANCE ACTIONS -->
-  <div class="card mb-3">
-    <div class="card-body">
-      <h5>Attendance</h5>
-      <div class="row g-2 mt-2">
-        <div class="col-6 col-md-3">
-          <button id="btnTimeIn" class="btn btn-success btn-wide" onclick="logAction('TIME_IN')">Time In</button>
-        </div>
-        <div class="col-6 col-md-3">
-          <button id="btnBreakOut" class="btn btn-warning btn-wide" onclick="logAction('BREAK_OUT')">Break Out</button>
-        </div>
-        <div class="col-6 col-md-3">
-          <button id="btnBreakIn" class="btn btn-info btn-wide" onclick="logAction('BREAK_IN')">Break In</button>
-        </div>
-        <div class="col-6 col-md-3">
-          <button id="btnTimeOut" class="btn btn-danger btn-wide" onclick="logAction('TIME_OUT')">Time Out</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ATTENDANCE RECORD -->
-  <div class="card mb-3">
-    <div class="card-body">
-      <h5>Attendance Record (Today)</h5>
-
-      <div class="record-row"><span>Time In</span><span id="recTimeIn" class="muted">Standby</span></div>
-      <div class="record-row"><span>Break In</span><span id="recBreakIn" class="muted">Standby</span></div>
-      <div class="record-row"><span>Break Out</span><span id="recBreakOut" class="muted">Standby</span></div>
-      <div class="record-row"><span>Time Out</span><span id="recTimeOut" class="muted">Standby</span></div>
-
-      <div class="d-grid mt-3">
-        <button class="btn btn-outline-secondary">Download Records</button>
-      </div>
-    </div>
-  </div>
-
+<!-- ATTENDANCE -->
+<div class="card">
+  <h3>Attendance</h3>
+  <button class="btn timein" onclick="logAction('TIME_IN')">Time In</button>
+  <button class="btn breakout" onclick="logAction('BREAK_OUT')">Break Out</button>
+  <button class="btn breakin" onclick="logAction('BREAK_IN')">Break In</button>
+  <button class="btn timeout" onclick="logAction('TIME_OUT')">Time Out</button>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const ATTENDANCE_WEBHOOK_URL =
+/* =========================
+   CONFIG
+========================= */
+const ATTENDANCE_WEBHOOK =
   "https://tumbletech.app.n8n.cloud/webhook-test/attendance";
 
-/* ================= USER SESSION ================= */
+/* =========================
+   LOAD LOGGED USER
+========================= */
 const userID = localStorage.getItem("userID");
 const fullName = localStorage.getItem("fullName");
+
+if (!userID) {
+  alert("No active session. Please log in again.");
+}
 
 document.getElementById("fullNameText").textContent =
   fullName || "Employee";
 
-/* ================= CLOCKS ================= */
-const workTz = document.getElementById("workTz");
+/* =========================
+   LOG ACTION
+========================= */
+async function logAction(action) {
 
-function updateClocks() {
-  const now = new Date();
-  localClock.textContent = now.toLocaleTimeString();
-  localTzLabel.textContent =
-    Intl.DateTimeFormat().resolvedOptions().timeZone;
-  workClock.textContent = now.toLocaleTimeString("en-US", {
-    timeZone: workTz.value
-  });
-}
-setInterval(updateClocks, 1000);
-updateClocks();
-
-/* ============ ATTENDANCE STATE ============ */
-let state = {
-  timeIn:false,
-  breakOut:false,
-  breakIn:false,
-  timeOut:false
-};
-
-function updateButtons() {
-  btnTimeIn.disabled = state.timeIn;
-  btnBreakOut.disabled = !state.timeIn || state.breakOut || state.timeOut;
-  btnBreakIn.disabled = !state.breakOut || state.timeOut;
-  btnTimeOut.disabled = !state.timeIn || state.breakOut || state.timeOut;
-}
-updateButtons();
-
-/* ============ ATTENDANCE LOGIC ============ */
-function logAction(action) {
-  const now = new Date();
-  const workTime = now.toLocaleTimeString("en-US", {
-    timeZone: workTz.value,
-    hour:"2-digit",
-    minute:"2-digit",
-    second:"2-digit"
-  });
-
-  if (action === "TIME_IN") {
-    state.timeIn = true;
-    recTimeIn.textContent = workTime;
-  }
-  if (action === "BREAK_OUT") {
-    state.breakOut = true;
-    recBreakOut.textContent = workTime;
-  }
-  if (action === "BREAK_IN") {
-    state.breakOut = false;
-    state.breakIn = true;
-    recBreakIn.textContent = workTime;
-  }
-  if (action === "TIME_OUT") {
-    state.timeOut = true;
-    recTimeOut.textContent = workTime;
+  if (!userID) {
+    alert("User not logged in.");
+    return;
   }
 
-  updateButtons();
-
-  fetch(ATTENDANCE_WEBHOOK_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userID,
-      fullName,
-      action,
-      work_timezone: workTz.value,
-      local_timestamp: now.toISOString(),
-      work_time_display: workTime
+  const payload = {
+    userID: userID,
+    action: action,
+    work_timezone: "Asia/Manila",
+    local_timestamp: new Date().toISOString(),
+    work_time_display: new Date().toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
     })
-  });
+  };
+
+  try {
+    const res = await fetch(ATTENDANCE_WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error("Webhook failed");
+
+    console.log("Logged:", payload);
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to record attendance.");
+  }
 }
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
