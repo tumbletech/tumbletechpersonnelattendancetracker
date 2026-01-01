@@ -1,96 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Employee Attendance</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tumbletech Attendance Portal</title>
 
-  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
-    body { background:#f4f6f8; }
-    .topbar { background:#1f2328; color:#fff; padding:16px; border-radius:12px; }
-    .btn-timein { background:#2e8b57; color:#fff; }
-    .btn-breakout { background:#f1c232; }
-    .btn-breakin { background:#5bc0de; }
-    .btn-timeout { background:#e06666; color:#fff; }
+    body {
+      background-color: #f0f2f5;
+    }
+    .card {
+      max-width: 500px;
+      margin: auto;
+      margin-top: 8%;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
   </style>
 </head>
 
-<body class="p-3">
+<body>
 
-  <!-- TOP BAR -->
-  <div class="topbar mb-3">
-    <div class="fs-5 fw-semibold">Employee Dashboard</div>
-    <div class="text-muted">
-      Welcome, <span id="fullNameText">Employee</span>
-    </div>
-  </div>
-
-  <!-- ATTENDANCE BUTTONS -->
-  <div class="card p-3 mb-3">
-    <div class="fw-semibold mb-2">Attendance</div>
-
-    <div class="d-grid gap-2">
-      <button class="btn btn-timein" onclick="logAction('TIME_IN')">Time In</button>
-      <button class="btn btn-breakout" onclick="logAction('BREAK_OUT')">Break Out</button>
-      <button class="btn btn-breakin" onclick="logAction('BREAK_IN')">Break In</button>
-      <button class="btn btn-timeout" onclick="logAction('TIME_OUT')">Time Out</button>
-    </div>
-  </div>
-
+<!-- 🔒 LOGIN GUARD -->
 <script>
-/* =========================================================
-   INITIALIZE USER CONTEXT
-========================================================= */
-
-// These MUST already be set by login.html
-// Example during login success:
-// localStorage.setItem("userID", "jose_inf");
-// localStorage.setItem("fullName", "Jose Infante");
-
-const userID = localStorage.getItem("userID");
-const fullName = localStorage.getItem("fullName");
-
-if (!userID) {
-  alert("No user session found. Please login again.");
+if (!localStorage.getItem("userID")) {
   window.location.href = "login.html";
-}
-
-document.getElementById("fullNameText").innerText = fullName || userID;
-
-
-/* =========================================================
-   SEND ATTENDANCE ACTION
-========================================================= */
-
-function logAction(actionType) {
-
-  const payload = {
-    userID: userID,
-    action: actionType
-  };
-
-  console.log("Sending attendance payload:", payload);
-
-  fetch("https://tumbletech.app.n8n.cloud/webhook-test/attendance", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(res => res.json())
-  .then(data => {
-    console.log("Attendance logged:", data);
-  })
-  .catch(err => {
-    console.error("Attendance error:", err);
-    alert("Failed to log attendance");
-  });
 }
 </script>
 
+<!-- 🕒 CLOCKS -->
+<div class="position-fixed top-0 end-0 p-3 text-end">
+  <div class="fw-bold">Local Time</div>
+  <div id="localClock" class="fs-5"></div>
+
+  <div class="fw-bold mt-2">Work Time</div>
+  <div id="workClock" class="fs-5"></div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div class="card-header bg-dark text-white text-center fw-bold fs-5">
+      Attendance Tracker
+    </div>
+
+    <div class="card-body text-center">
+      <h5 class="mb-3">
+        Welcome, <span id="empName"></span>
+      </h5>
+
+      <button class="btn btn-success w-100 mb-2" onclick="logAttendance('TIME_IN')">
+        Time In
+      </button>
+
+      <button class="btn btn-danger w-100 mb-2" onclick="logAttendance('TIME_OUT')">
+        Time Out
+      </button>
+
+      <div id="lastAction" class="mt-3 text-muted"></div>
+
+      <button class="btn btn-outline-secondary w-100 mt-4" onclick="logout()">
+        Logout
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* 👤 USER INFO */
+document.getElementById("empName").innerText =
+  localStorage.getItem("fullName");
+
+/* 🕒 CLOCK LOGIC */
+const WORK_TIMEZONE = "Asia/Manila";
+
+function updateClocks() {
+  const now = new Date();
+
+  document.getElementById("localClock").innerText =
+    now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  document.getElementById("workClock").innerText =
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: WORK_TIMEZONE,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).format(now);
+}
+
+setInterval(updateClocks, 1000);
+updateClocks();
+
+/* 🧾 ATTENDANCE (placeholder – wire to n8n next) */
+function logAttendance(action) {
+  const now = new Date();
+
+  const localTime = now.toLocaleTimeString();
+  const workTime = new Intl.DateTimeFormat("en-US", {
+    timeZone: WORK_TIMEZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).format(now);
+
+  document.getElementById("lastAction").innerText =
+    `Last action: ${action.replace('_', ' ')} – ${workTime} (Work Time)`;
+
+  console.log({
+    userID: localStorage.getItem("userID"),
+    action: action,
+    local_time: localTime,
+    work_time: workTime,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+  });
+}
+
+/* 🚪 LOGOUT */
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
