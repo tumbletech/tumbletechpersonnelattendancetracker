@@ -60,12 +60,23 @@
   <button class="btn timeout" onclick="logAction('TIME_OUT')">Time Out</button>
 </div>
 
+<hr style="margin:16px 0">
+
+<button class="btn" style="background:#1f2933;color:#fff"
+  onclick="downloadAttendance()">
+  Download Attendance (PDF)
+</button>
+
+
 <script>
 /* =========================
    CONFIG
 ========================= */
 const ATTENDANCE_WEBHOOK =
   "https://tumbletech.app.n8n.cloud/webhook-test/attendance";
+
+const DOWNLOAD_WEBHOOK =
+  "https://tumbletech.app.n8n.cloud/webhook-test/attendance-download";
 
 /* =========================
    LOAD LOGGED USER
@@ -120,5 +131,46 @@ async function logAction(action) {
 }
 </script>
 
+<script>
+async function downloadAttendance() {
+
+  if (!userID) {
+    alert("User not logged in.");
+    return;
+  }
+
+  try {
+    const res = await fetch(DOWNLOAD_WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userID: userID,
+        year: new Date().getFullYear()
+      })
+    });
+
+    if (!res.ok) throw new Error("Download failed");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${userID}_attendance.pdf`;
+    document.body.appendChild(a);
+    a.click();
+
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to download attendance.");
+  }
+}
+</script>
+
+
 </body>
 </html>
+
